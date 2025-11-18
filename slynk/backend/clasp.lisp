@@ -97,7 +97,7 @@
                                                   ((nil) :none)
                                                   (:line :line))
                                      :element-type (if external-format
-                                                       'character 
+                                                       'character
                                                        '(unsigned-byte 8))
                                      :external-format external-format))
 (defun accept (socket)
@@ -115,7 +115,7 @@
 
 (defvar *external-format-to-coding-system*
   '((:latin-1
-     "latin-1" "latin-1-unix" "iso-latin-1-unix" 
+     "latin-1" "latin-1-unix" "iso-latin-1-unix"
      "iso-8859-1" "iso-8859-1-unix")
     (:utf-8 "utf-8" "utf-8-unix")))
 
@@ -156,13 +156,13 @@
 (defun make-interrupt-handler (real-handler)
   (let ((main-thread (find 'si:top-level (mp:all-processes)
                            :key #'mp:process-name)))
-    #'(lambda (&rest args)
+    (lambda (&rest args)
         (declare (ignore args))
         (mp:interrupt-process main-thread real-handler))))
 
 #-threads
 (defun make-interrupt-handler (real-handler)
-  #'(lambda (&rest args)
+  (lambda (&rest args)
       (declare (ignore args))
       (funcall real-handler)))
 
@@ -196,7 +196,7 @@
                   for fd = (socket-fd s)
                   collect (cons fd s)
                   do (serve-event:add-fd-handler fd :input
-                                                 #'(lambda (fd)
+                                                 (lambda (fd)
                                                      (push fd active-fds))))))
       (serve-event:serve-event timeout)
       (loop for fd in active-fds collect (cdr (assoc fd fd-stream-alist)))))
@@ -208,7 +208,7 @@
              (timeout (return (poll-streams streams 0)))
              (t
               (when-let (ready (poll-streams streams 0.2))
-                        (return ready))))))  
+                        (return ready))))))
 
 ) ; #+serve-event (progn ...
 
@@ -398,7 +398,7 @@
 
 (defun make-invoke-debugger-hook (hook)
   (when hook
-    #'(lambda (condition old-hook)
+    (lambda (condition old-hook)
         ;; Regard *debugger-hook* if set by user.
         (if *debugger-hook*
             nil         ; decline, *DEBUGGER-HOOK* will be tried next.
@@ -685,7 +685,7 @@
            (mutex (mailbox.mutex mbox)))
       (mp:with-lock (mutex)
         (mp:condition-variable-broadcast (mailbox.cvar mbox)))))
-  
+
   (defimplementation send (thread message)
     (let* ((mbox (mailbox thread))
            (mutex (mailbox.mutex mbox)))
@@ -694,7 +694,7 @@
               (nconc (mailbox.queue mbox) (list message)))
         (mp:condition-variable-broadcast (mailbox.cvar mbox)))))
 
-  
+
   (defimplementation receive-if (test &optional timeout)
     (let* ((mbox (mailbox (current-thread)))
            (mutex (mailbox.mutex mbox)))
@@ -707,7 +707,7 @@
              (when tail
                (setf (mailbox.queue mbox) (nconc (ldiff q tail) (cdr tail)))
                (return (car tail))))
-           (when (eq timeout t) (return (values nil t))) 
+           (when (eq timeout t) (return (values nil t)))
            (mp:condition-variable-wait (mailbox.cvar mbox) mutex) ; timedwait 0.2
            (sys:check-pending-interrupts)))))
 

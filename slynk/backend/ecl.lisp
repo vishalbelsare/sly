@@ -108,7 +108,7 @@
                                                   ((nil) :none)
                                                   (:line :line))
                                      :element-type (if external-format
-                                                       'character 
+                                                       'character
                                                        '(unsigned-byte 8))
                                      :external-format external-format))
 
@@ -171,11 +171,11 @@
   #+threads
   (let ((main-thread (find 'si:top-level (mp:all-processes)
                            :key #'mp:process-name)))
-    #'(lambda (&rest args)
+    (lambda (&rest args)
         (declare (ignore args))
         (mp:interrupt-process main-thread real-handler)))
   #-threads
-  #'(lambda (&rest args)
+  (lambda (&rest args)
       (declare (ignore args))
       (funcall real-handler)))
 
@@ -401,7 +401,7 @@
     (function (si:compiled-function-name f))))
 
 ;;; Default implementation is fine (CL).
-;;; 
+;;;
 ;;; valid-function-name-p (form)
 
 #+walker
@@ -455,7 +455,7 @@
 
 (defun make-invoke-debugger-hook (hook)
   (when hook
-    #'(lambda (condition old-hook)
+    (lambda (condition old-hook)
         ;; Regard *debugger-hook* if set by user.
         (if *debugger-hook*
             nil         ; decline, *DEBUGGER-HOOK* will be tried next.
@@ -666,7 +666,7 @@
                  collect (destructuring-bind (dspec file . pos) annotation
                            `(,dspec ,(make-file-location file pos)))))
           (t
-           (mapcan #'(lambda (type) (find-definitions-by-type name type))
+           (mapcan (lambda (type) (find-definitions-by-type name type))
                    (classify-definition-name name))))))
 
 (defun classify-definition-name (name)
@@ -731,7 +731,7 @@
     (error "ECL's source directory ~A does not exist. ~
             You can specify a different location via the environment ~
             variable `ECLSRCDIR'."
-           (namestring (translate-logical-pathname #P"SYS:"))))) 
+           (namestring (translate-logical-pathname #P"SYS:")))))
 
 (defun assert-TAGS-file ()
   (unless (probe-file +TAGS+)
@@ -842,7 +842,7 @@
 ;;;  (:defgeneric NAME)                     ; a generic function with all methods
 ;;;  (:call CALLER CALLEE)                  ; trace calls from CALLER to CALLEE.
 ;;;  (:labels TOPLEVEL LOCAL)
-;;;  (:flet TOPLEVEL LOCAL) 
+;;;  (:flet TOPLEVEL LOCAL)
 ;;;
 ;;;   toggle-trace (spec)
 
@@ -1018,7 +1018,7 @@
                       for fd = (socket-fd s)
                       collect (cons fd s)
                       do (serve-event:add-fd-handler fd :input
-                                                     #'(lambda (fd)
+                                                     (lambda (fd)
                                                          (push fd active-fds))))))
              (serve-event:serve-event timeout)
              (loop for fd in active-fds collect (cdr (assoc fd fd-stream-alist))))))

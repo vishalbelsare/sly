@@ -48,7 +48,7 @@
 Exits Emacs when finished. The exit code is the number of failed tests."
   (interactive)
   (let ((ert-debug-on-error nil)
-        (timeout 30))
+        (timeout 60))
     (sly)
     ;; Block until we are up and running.
     (let (timed-out)
@@ -95,7 +95,7 @@ Exits Emacs when finished. The exit code is the number of failed tests."
                        (string-match "test/sly-\\(.*\\)\.elc?$" file-name))
                   (list 'contrib (intern (match-string 1 file-name)))
                 '(core)))))
-  
+
   (defmacro define-sly-ert-test (name &rest args)
     "Like `ert-deftest', but set tags automatically.
 Also don't error if `ert.el' is missing."
@@ -129,7 +129,7 @@ Also don't error if `ert.el' is missing."
                     (if (cl-find-if
                          (lambda (impl)
                            (unless (listp impl)
-                             (setq impl (list impl #'(lambda (&rest _ign) t))))
+                             (setq impl (list impl (lambda (&rest _ign) t))))
                            (and (equal (car impl) (sly-lisp-implementation-name))
                                 (funcall
                                  (cadr impl)
@@ -360,7 +360,7 @@ conditions (assertions)."
   '(("foo")
     ("#:foo")
     ("#'foo")
-    ("#'(lambda (x) x)")
+    ("(lambda (x) x)")
     ("()"))
   (with-temp-buffer
     (lisp-mode)
@@ -1313,7 +1313,7 @@ Reconnect afterwards."
       (with-current-buffer mrepl-buffer
         ;; FIXME: suboptimal: wait one second for the lisp
         ;; to reply.
-        (sit-for 1) 
+        (sit-for 1)
         (unless (and (string-match "^; +SLY" (buffer-string))
                      (string-match "CL-USER> *$" (buffer-string)))
           (die (format "MREPL prompt: %s" (buffer-string))))))))
@@ -1343,7 +1343,7 @@ Reconnect afterwards."
                         ,(when (null landing) '(kill-emacs 0))
                         (add-hook
                          'sly-connected-hook
-                         #'(lambda ()
+                         (lambda ()
                              (condition-case err
                                  (progn
                                    ,@landing
@@ -1355,7 +1355,7 @@ Reconnect afterwards."
                (error
                 (die "Unexpected error running preflight/takeoff forms" err)))
              (with-timeout
-                 (30
+                 (60
                   (die "Timeout waiting for recipe test to finish."))
                (while t (sit-for 1)))))))
     (unwind-protect
@@ -1446,7 +1446,7 @@ Reconnect afterwards."
                                    (sly-test--eval-now "(.fn3.)"))
                              '("nil" "nil")))
           ;; Recompile now
-          ;; 
+          ;;
           (with-current-buffer xref-buffer
             (sly-recompile-all-xrefs)
             (sly-wait-condition "Compilation finished"

@@ -55,9 +55,9 @@
    ;; The connection list is also tweaked
    ;;
    (setq sly-connection-list-button-action
-         #'(lambda (process)
-             (let ((sly-default-connection process))
-               (sly-mrepl 'pop-to-buffer)))))
+         (lambda (process)
+           (let ((sly-default-connection process))
+             (sly-mrepl 'pop-to-buffer)))))
   (:on-unload
    ;; FIXME: This `:on-unload' is grossly incomplete
    ;;
@@ -217,9 +217,9 @@ for output printed to the REPL (not for evaluation results)")
 (sly-define-channel-method listener :set-read-mode (mode)
   (with-current-buffer (sly-channel-get self 'buffer)
     (cl-macrolet ((assert-soft
-                   (what) `(unless ,what
-                             (sly-warning
-                              ,(format "Expectation failed: %s" what)))))
+                    (what) `(unless ,what
+                              (sly-warning
+                               ,(format "Expectation failed: %s" what)))))
       (let ((inhibit-read-only t))
         (cl-ecase mode
           (:read
@@ -269,22 +269,22 @@ for output printed to the REPL (not for evaluation results)")
 ;;;
 (define-button-type 'sly-mrepl-part :supertype 'sly-part
   'sly-button-inspect
-  #'(lambda (entry-idx value-idx)
-      (sly-eval-for-inspector `(slynk-mrepl:inspect-entry
-                                ,sly-mrepl--remote-channel
-                                ,entry-idx
-                                ,value-idx)
-                              :inspector-name (sly-maybe-read-inspector-name)))
+  (lambda (entry-idx value-idx)
+    (sly-eval-for-inspector `(slynk-mrepl:inspect-entry
+                              ,sly-mrepl--remote-channel
+                              ,entry-idx
+                              ,value-idx)
+                            :inspector-name (sly-maybe-read-inspector-name)))
   'sly-button-describe
-  #'(lambda (entry-idx value-idx)
-      (sly-eval-describe `(slynk-mrepl:describe-entry ,sly-mrepl--remote-channel
-                                                      ,entry-idx
-                                                      ,value-idx)))
-  'sly-button-pretty-print
-  #'(lambda (entry-idx value-idx)
-      (sly-eval-describe `(slynk-mrepl:pprint-entry ,sly-mrepl--remote-channel
+  (lambda (entry-idx value-idx)
+    (sly-eval-describe `(slynk-mrepl:describe-entry ,sly-mrepl--remote-channel
                                                     ,entry-idx
                                                     ,value-idx)))
+  'sly-button-pretty-print
+  (lambda (entry-idx value-idx)
+    (sly-eval-describe `(slynk-mrepl:pprint-entry ,sly-mrepl--remote-channel
+                                                  ,entry-idx
+                                                  ,value-idx)))
   'sly-mrepl-copy-part-to-repl 'sly-mrepl--copy-part-to-repl)
 
 
@@ -359,7 +359,7 @@ In that case, moving a sexp backward does nothing."
 
 (defmacro sly-mrepl--with-repl (repl-buffer &rest body)
   (declare (indent 1) (debug (sexp &rest form)))
-  `(sly-mrepl--call-with-repl ,repl-buffer #'(lambda () ,@body)))
+  `(sly-mrepl--call-with-repl ,repl-buffer (lambda () ,@body)))
 
 (defun sly-mrepl--insert (string &optional face)
   (sly-mrepl--commiting-text (when face
@@ -789,10 +789,10 @@ REPL is the REPL buffer to return the objects to."
   (sly-eval-async
       `(slynk-mrepl:globally-save-object ',(car slyfun-and-args)
                                          ,@(cdr slyfun-and-args))
-    #'(lambda (_ignored)
-        (sly-mrepl--copy-globally-saved-to-repl :before before
-                                                :after after
-                                                :repl repl))))
+    (lambda (_ignored)
+      (sly-mrepl--copy-globally-saved-to-repl :before before
+                                              :after after
+                                              :repl repl))))
 
 (cl-defun sly-mrepl--copy-globally-saved-to-repl
     (&key before after repl (pop-to-buffer t))
@@ -876,14 +876,14 @@ history entry navigated to."
   (unless (eq isearch-search-fun-function
               'isearch-search-fun-default)
     (set (make-local-variable 'isearch-search-fun-function)
-         #'(lambda ()
-             #'(lambda (&rest args)
-                 (cl-letf
-                     (((symbol-function
-                        'comint-line-beginning-position)
-                       #'field-beginning))
-                   (apply (comint-history-isearch-search)
-                          args))))))
+         (lambda ()
+           (lambda (&rest args)
+             (cl-letf
+                 (((symbol-function
+                    'comint-line-beginning-position)
+                   #'field-beginning))
+               (apply (comint-history-isearch-search)
+                      args))))))
   (sly-mrepl--set-eli-input)
   (when sly-mrepl-eli-like-history-navigation
     (set (make-local-variable 'isearch-push-state-function)
@@ -1024,7 +1024,7 @@ handle to distinguish the new buffer from the existing."
     (let* ((local (sly-make-channel sly-listener-channel-methods))
            (buffer (pop-to-buffer name))
            (default-directory (if (file-readable-p default-directory)
-                                   default-directory
+                                  default-directory
                                 (expand-file-name "~/"))))
       (with-current-buffer buffer
         (sly-mrepl-mode)
@@ -1125,27 +1125,27 @@ prefix argument is given."
                         (sly-to-lisp-filename directory)))
      :insert-p nil
      :before-prompt
-     #'(lambda (results)
-         (cl-destructuring-bind (package-2 directory-2) results
-           (sly-mrepl--insert-note
-            (cond ((and package directory)
-                   (format "Synched package to %s and directory to %s"
-                           package-2 directory-2))
-                  (directory
-                   (format "Synched directory to %s" directory-2))
-                  (package
-                   (format "Synched package to %s" package-2))
-                  (t
-                   (format "Remaining in package %s and directory %s"
-                           package-2 directory-2))))))
+     (lambda (results)
+       (cl-destructuring-bind (package-2 directory-2) results
+         (sly-mrepl--insert-note
+          (cond ((and package directory)
+                 (format "Synched package to %s and directory to %s"
+                         package-2 directory-2))
+                (directory
+                 (format "Synched directory to %s" directory-2))
+                (package
+                 (format "Synched package to %s" package-2))
+                (t
+                 (format "Remaining in package %s and directory %s"
+                         package-2 directory-2))))))
      :after-prompt
-     #'(lambda (_results)
-         (when expression
-           (goto-char (point-max))
-           (let ((saved (point)))
-             (insert expression)
-             (when (string-match "\n" expression)
-               (indent-region saved (point-max)))))))))
+     (lambda (_results)
+       (when expression
+         (goto-char (point-max))
+         (let ((saved (point)))
+           (insert expression)
+           (when (string-match "\n" expression)
+             (indent-region saved (point-max)))))))))
 
 (defun sly-mrepl-clear-repl ()
   "Clear all this REPL's output history.
@@ -1198,7 +1198,7 @@ Doesn't clear input history."
   ;; anyway...
   (let* ((inhibit-field-text-motion t)
          (pos (previous-single-char-property-change (1- (line-beginning-position))
-                                                   'sly-mrepl--prompt)))
+                                                    'sly-mrepl--prompt)))
     (goto-char pos)
     (goto-char (line-beginning-position)))
   (end-of-line))
@@ -1243,15 +1243,15 @@ Doesn't clear input history."
   (sly-mrepl--save-and-copy-for-repl
    `(slynk-backend:frame-arguments ,frame-id)
    :before (format "The actual arguments passed to frame %s" frame-id)
-   :after #'(lambda (objects)
-              (sly-mrepl--insert-call spec objects))))
+   :after (lambda (objects)
+            (sly-mrepl--insert-call spec objects))))
 
 (defun sly-trace-dialog-copy-call-to-repl (trace-id spec)
   (sly-mrepl--save-and-copy-for-repl
    `(slynk-trace-dialog:trace-arguments-or-lose ,trace-id)
    :before (format "The actual arguments passed to trace %s" trace-id)
-   :after #'(lambda (objects)
-              (sly-mrepl--insert-call spec objects))))
+   :after (lambda (objects)
+            (sly-mrepl--insert-call spec objects))))
 
 (defun sly-mrepl-inside-string-or-comment-p ()
   (let ((mark (and (process-live-p (sly-mrepl--process))
@@ -1272,11 +1272,11 @@ Doesn't clear input history."
     (define-key sly-mrepl-mode-map sly-mrepl-shortcut nil))
   (set-default 'sly-mrepl-shortcut key-sequence)
   (define-key sly-mrepl-mode-map key-sequence
-    '(menu-item "" sly-mrepl-shortcut
-                :filter (lambda (cmd)
-                          (if (and (eq major-mode 'sly-mrepl-mode)
-                                   (sly-mrepl--shortcut-location-p))
-                              cmd)))))
+              '(menu-item "" sly-mrepl-shortcut
+                          :filter (lambda (cmd)
+                                    (if (and (eq major-mode 'sly-mrepl-mode)
+                                             (sly-mrepl--shortcut-location-p))
+                                        cmd)))))
 
 (defcustom sly-mrepl-shortcut (kbd ",")
   "Keybinding string used for the REPL shortcut commands.
