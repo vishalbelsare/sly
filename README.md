@@ -1,8 +1,9 @@
-[![Build Status](https://travis-ci.org/joaotavora/sly.png?branch=master)](https://travis-ci.org/joaotavora/sly)
+[![Tests](https://github.com/joaotavora/sly/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/joaotavora/sly/actions/workflows/ci.yml)
+[![MELPA Stable](https://stable.melpa.org/packages/sly-badge.svg)](https://stable.melpa.org/#/sly)
 [![MELPA](https://melpa.org/packages/sly-badge.svg)](https://melpa.org/#/sly)
 
 ```lisp
-          _____    __   __  __        
+          _____    __   __  __
          / ___/   / /   \ \/ /               |\      _,,,---,,_
          \__ \   / /     \  /                /,`.-'`'    -.  ;-;;,_
         ___/ /  / /___   / /                |,4-  ) )-,_..;\ (  `'-'
@@ -147,10 +148,10 @@ C. Rittweiler and [many others][8]. I forked SLIME because I used it daily,
 for work, had a long list of hacks developed for myself, and wanted to share
 them with others.
 
-In 2013, SLIME development was stalling, patches and issues rotting. In early 
-2014,  Luís Oliveira and myself moved SLIME to Github and set up its Travis CI 
-system. I brought in the old bug reports from the Launchpad tracker, fixed 
-long-standing problems and submitted many changes, particularly to the 
+In 2013, SLIME development was stalling, patches and issues rotting. In early
+2014,  Luís Oliveira and myself moved SLIME to Github and set up its Travis CI
+system. I brought in the old bug reports from the Launchpad tracker, fixed
+long-standing problems and submitted many changes, particularly to the
 under-curated but popular "contrib" section.
 
 Now, the changes that SLY brings to the table are too deep at the Elisp and Lisp
@@ -158,7 +159,7 @@ level to be accepted to SLIME, given its current focus on stability (for the
 record, I find this perfectly reasonable). The new features, such as stickers or
 multiple inspectors, cannot be realized well using only the existing "contrib"
 system.  Finally, SLY frees itself from the shackles of Emacs 23 and supports
-Emacs 24.3+ only, allowing for much cleaner code and liberal use of lexical
+Emacs 24.5+ only, allowing for much cleaner code and liberal use of lexical
 binding.
 
 The list of technical reasons is bigger than this though, and you can read up on

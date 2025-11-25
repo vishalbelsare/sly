@@ -499,7 +499,7 @@
           ;; declaration. So we strip those as long as there's no
           ;; better way. (FIXME)
           `(&any ,@(remove-if-not
-                    #'(lambda (qualifier)
+                    (lambda (qualifier)
                         (find-symbol (symbol-name (first qualifier)) :cl))
                     flags :key #'ensure-list))
           (call-next-method)))))
@@ -1073,7 +1073,7 @@ Return NIL if the symbol is unbound."
      (describe (find-class symbol)))
     (:type
      (describe (sb-kernel:values-specifier-type symbol)))))
-  
+
 #+#.(slynk-sbcl::sbcl-with-xref-p)
 (progn
   (defmacro defxref (name &optional fn-name)
@@ -1848,7 +1848,7 @@ stack."
 
 ;;; Weak datastructures
 
-(defimplementation make-weak-key-hash-table (&rest args)  
+(defimplementation make-weak-key-hash-table (&rest args)
   #+#.(slynk-sbcl::sbcl-with-weak-hash-tables)
   (apply #'make-hash-table :weakness :key args)
   #-#.(slynk-sbcl::sbcl-with-weak-hash-tables)

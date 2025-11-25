@@ -86,9 +86,9 @@ program.")
                   args))
     (slynk-backend:call-with-lock-held
      *trace-lock*
-     #'(lambda ()
-         (setf (slot-value entry 'id) (fill-pointer *traces*))
-         (vector-push-extend entry *traces*)))))
+     (lambda ()
+       (setf (slot-value entry 'id) (fill-pointer *traces*))
+       (vector-push-extend entry *traces*)))))
 
 (defmethod print-object ((entry trace-entry) stream)
   (print-unreadable-object (entry stream)
@@ -101,10 +101,10 @@ program.")
 
 (defun useful-backtrace ()
   (slynk-backend:call-with-debugging-environment
-   #'(lambda ()
-       (loop for i from 0
-             for frame in (slynk-backend:compute-backtrace 0 20)
-             collect (list i (slynk::frame-to-string frame))))))
+   (lambda ()
+     (loop for i from 0
+           for frame in (slynk-backend:compute-backtrace 0 20)
+           collect (list i (slynk::frame-to-string frame))))))
 
 (defun current-trace ()
   (gethash (slynk-backend:current-thread) *current-trace-by-thread*))
@@ -161,8 +161,8 @@ program.")
                      (setq *unfinished-traces*
                            (remove trace *unfinished-traces*))))
          (new (loop for i
-                    from (length recently-finished)
-                      below *traces-per-report*
+                      from (length recently-finished)
+                        below *traces-per-report*
                     while (< *visitor-idx* (length *traces*))
                     for trace = (aref *traces* *visitor-idx*)
                     collect trace
@@ -192,7 +192,7 @@ program.")
         *unfinished-traces* nil)
   (slynk-backend:call-with-lock-held
    *trace-lock*
-   #'(lambda () (setf (fill-pointer *traces*) 0)))
+   (lambda () (setf (fill-pointer *traces*) 0)))
   nil)
 
 (defslyfun trace-part-or-lose (id part-id type)
@@ -284,14 +284,14 @@ program.")
 ;;;; Hook onto emacs
 ;;;;
 (setq slynk:*after-toggle-trace-hook*
-      #'(lambda (spec traced-p)
-          (when *dialog-trace-follows-trace*
-            (cond (traced-p
-                   (dialog-trace spec)
-                   "traced for trace dialog as well")
-                  (t
-                   (dialog-untrace spec)
-                   "untraced for the trace dialog as well")))))
+      (lambda (spec traced-p)
+        (when *dialog-trace-follows-trace*
+          (cond (traced-p
+                 (dialog-trace spec)
+                 "traced for trace dialog as well")
+                (t
+                 (dialog-untrace spec)
+                 "untraced for the trace dialog as well")))))
 
 
 ;;;; Instrumentation
